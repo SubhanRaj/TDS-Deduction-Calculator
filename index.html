@@ -9,7 +9,44 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        @media (max-width: 1024px) {
+            .table thead {
+                display: none;
+            }
 
+            .table tbody,
+            .table tr {
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            .table td {
+                flex: 1 1 50%;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0.5rem;
+                border: 1px solid #dee2e6;
+            }
+
+            .table td::before {
+                content: attr(data-label);
+                flex: 1;
+                font-weight: bold;
+                text-align: left;
+            }
+
+            .table td input {
+                flex: 1;
+                margin-left: 0.5rem;
+            }
+
+            .table td .btn {
+                margin-right: 0.5rem;
+            }
+        }
+    </style>
 </head>
 
 <body class="bg-light p-4">
@@ -18,55 +55,61 @@
 
         <div class="mb-4 p-3 bg-light border rounded">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-6 col-12">
                     <label class="form-label"><strong>Enter Total Billed Amount:</strong></label>
                     <input type="number" id="manualBilled" class="form-control mb-2">
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 col-12">
                     <label class="form-label"><strong>Enter Total Received Amount:</strong></label>
                     <input type="number" id="manualReceived" class="form-control mb-2">
                 </div>
             </div>
             <div class="row mt-3 text-center">
-                <div class="col-12 d-flex gap-2">
-                    <button onclick="manualCalculation()" class="btn btn-primary flex-grow-1">Calculate</button>
+                <div class="col-12 d-flex flex-column flex-md-row gap-2">
+                    <button onclick="manualCalculation()"
+                        class="btn btn-primary flex-grow-1 mb-2 mb-md-0">Calculate</button>
                     <button onclick="clearFields()" class="btn btn-secondary flex-grow-1">Clear</button>
                 </div>
             </div>
             <div class="row mt-3">
-                <div class="col-md-6"><strong>Deducted Amount:</strong> ₹<span id="manualDeduction">0.00</span></div>
-                <div class="col-md-6"><strong>Deduction Percentage & Type:</strong> <span
+                <div class="col-md-6 col-12"><strong>Deducted Amount:</strong> ₹<span id="manualDeduction">0.00</span>
+                </div>
+                <div class="col-md-6 col-12"><strong>Deduction Percentage & Type:</strong> <span
                         id="manualDeductionPercentage">0.00%</span></div>
             </div>
         </div>
 
-        <table class="table table-bordered" id="billTable">
-            <thead class="table-light text-center">
-                <tr>
-                    <th>Bill Number</th>
-                    <th>Date</th>
-                    <th>Bill Amount (₹)</th>
-                    <th>Deduction (₹)</th>
-                    <th>Deduction Percentage & Type</th>
-                    <th>Amount Received (₹)</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <div class="text-center my-3 d-flex gap-2 justify-content-center">
-            <button onclick="addRow()" class="btn btn-primary">+ Add Bill</button>
-            <button onclick="exportToExcel()" class="btn btn-success">Export to Excel</button>
-            <button onclick="exportToPDF()" class="btn btn-danger">Export to PDF</button>
+        <div class="table-responsive">
+            <table class="table table-bordered" id="billTable">
+                <thead class="table-light text-center">
+                    <tr>
+                        <th>Bill Number</th>
+                        <th>Date</th>
+                        <th>Bill Amount (₹)</th>
+                        <th>Deduction (₹)</th>
+                        <th>Deduction Percentage & Type</th>
+                        <th>Amount Received (₹)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="text-center my-3 d-flex flex-column flex-md-row gap-2 justify-content-center">
+            <button onclick="addRow()" class="btn btn-primary mb-2 mb-md-0">+ Add Bill</button>
+            <button onclick="exportToExcel()" class="btn btn-success mb-2 mb-md-0">Export to Excel</button>
+            <button onclick="exportToPDF()" class="btn btn-danger mb-2 mb-md-0">Export to PDF</button>
             <button onclick="window.print()" class="btn btn-secondary">Print</button>
         </div>
 
         <div class="mt-4 p-3 bg-light border rounded text-center">
             <div class="row">
-                <div class="col-md-4"><strong>Total Billed Amount:</strong> ₹<span id="totalBilled">0.00</span></div>
-                <div class="col-md-4"><strong>Total Deducted:</strong> ₹<span id="totalDeducted">0.00</span></div>
-                <div class="col-md-4"><strong>Total Amount Received:</strong> ₹<span id="totalReceived">0.00</span>
+                <div class="col-md-4 col-12"><strong>Total Billed Amount:</strong> ₹<span id="totalBilled">0.00</span>
+                </div>
+                <div class="col-md-4 col-12"><strong>Total Deducted:</strong> ₹<span id="totalDeducted">0.00</span>
+                </div>
+                <div class="col-md-4 col-12"><strong>Total Amount Received:</strong> ₹<span
+                        id="totalReceived">0.00</span>
                 </div>
             </div>
             <div class="mt-2"><strong>Total Deduction Percentage & Type:</strong> <span
@@ -101,16 +144,28 @@
             document.getElementById("manualReceived").value = received.toFixed(2);
             document.getElementById("manualDeduction").innerText = (billed - received).toFixed(2);
             document.getElementById("manualDeductionPercentage").innerText = percentage.toFixed(2) + "% " + deductionDetails;
+
+            // Update the table rows with the new percentage
+            updateTableRows(percentage, deductionDetails);
         }
 
-        function clearFields() {
-            document.getElementById("manualBilled").value = "";
-            document.getElementById("manualReceived").value = "";
-            document.getElementById("manualDeduction").innerText = "0.00";
-            document.getElementById("manualDeductionPercentage").innerText = "0.00%";
+        function updateTableRows(percentage, deductionDetails) {
+            document.querySelectorAll("#billTable tbody tr").forEach(row => {
+                let billAmount = parseFloat(row.querySelector(".billAmount").value) || 0;
+                let receivedAmount = billAmount - (billAmount * percentage / 100);
+                let deductionAmount = billAmount - receivedAmount;
+
+                row.querySelector(".deduction").innerText = deductionAmount.toFixed(2);
+                row.querySelector(".deductionPercentage").innerText = percentage.toFixed(2) + "% " + deductionDetails;
+                row.querySelector(".receivedAmount").value = receivedAmount.toFixed(2);
+            });
+
+            // Recalculate totals
+            calculateTotals();
         }
 
-       function calculateTotals() {
+
+        function calculateTotals() {
             let totalBilled = 0;
             let totalDeducted = 0;
             let totalReceived = 0;
@@ -140,61 +195,70 @@
             document.getElementById("totalReceived").innerText = totalReceived;
             document.getElementById("totalDeductionPercentage").innerText = totalPercentage.toFixed(2) + "% " + totalDeductionDetails;
         }
-       function addRow() {
+        function addRow() {
             let table = document.getElementById("billTable").getElementsByTagName('tbody')[0];
             let newRow = table.insertRow();
             newRow.innerHTML = `
-            <td><input type="text" class="form-control"></td>
-            <td><input type="date" class="form-control"></td>
-            <td><input type="number" class="form-control billAmount"  onblur="updateRow(this)"></td>
-            <td class="deduction">0.00</td>
-            <td class="deductionPercentage">0.00%</td>
-            <td><input type="number" class="form-control receivedAmount" onblur="updateRow(this)"></td>
-            <td><button class="btn btn-danger btn-sm" onclick="deleteRow(this)">Delete</button></td>
-        `;
+                <td data-label="Bill Number"><input type="text" class="form-control"></td>
+                <td data-label="Date"><input type="date" class="form-control"></td>
+                <td data-label="Bill Amount (₹)"><input type="number" class="form-control billAmount" onblur="updateRow(this)"></td>
+                <td data-label="Deduction (₹)" class="deduction">0.00</td>
+                <td data-label="Deduction Percentage & Type" class="deductionPercentage">0.00%</td>
+                <td data-label="Amount Received (₹)"><input type="number" class="form-control receivedAmount" onblur="updateRow(this)"></td>
+                <td data-label="Action">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-danger btn-sm" onclick="deleteRow(this)">Delete</button>
+                        <button class="btn btn-secondary btn-sm" onclick="clearRow(this)">Clear</button>
+                    </div>
+                </td>
+            `;
             calculateTotals();
         }
 
         function updateRow(input) {
-                let row = input.parentNode.parentNode;
-                let billAmount = parseFloat(row.querySelector(".billAmount").value) || 0;
-                let receivedAmount = parseFloat(row.querySelector(".receivedAmount").value) || 0;
-                let percentage = 0;
-                let deductionDetails = "";
+            let row = input.parentNode.parentNode;
+            let billAmount = parseFloat(row.querySelector(".billAmount").value) || 0;
+            let receivedAmount = parseFloat(row.querySelector(".receivedAmount").value) || 0;
+            let percentage = parseFloat(document.getElementById("manualDeductionPercentage").innerText) || 0;
+            let deductionDetails = document.getElementById("manualDeductionPercentage").innerText.split(" ")[1] || "";
 
-                if (billAmount) {
-                    percentage = billAmount > 25000 ? 4.24 : 2.24;
-                    deductionDetails = billAmount > 25000 ? "2% GST + 2.24% TDS" : "2.24% TDS";
-                    receivedAmount = billAmount - (billAmount * percentage / 100);
-                } else if (receivedAmount) {
-                    billAmount = receivedAmount / (1 - (2.24 / 100));
-                    if (billAmount > 25000) {
-                        billAmount = receivedAmount / (1 - (4.24 / 100));
-                        percentage = 4.24;
-                        deductionDetails = "2% GST + 2.24% TDS";
-                    } else {
-                        percentage = 2.24;
-                        deductionDetails = "2.24% TDS";
-                    }
-                }
-
-                let deductionAmount = billAmount - receivedAmount;
-                row.querySelector(".deduction").innerText = deductionAmount.toFixed(2);
-                row.querySelector(".deductionPercentage").innerText = percentage.toFixed(2) + "% " + deductionDetails;
-
-                // Update the input fields with calculated values
-                row.querySelector(".billAmount").value = billAmount.toFixed(2);
-                row.querySelector(".receivedAmount").value = receivedAmount.toFixed(2);
-
-                // Calculate totals
-                calculateTotals();
+            if (billAmount) {
+                receivedAmount = billAmount - (billAmount * percentage / 100);
+            } else if (receivedAmount) {
+                billAmount = receivedAmount / (1 - (percentage / 100));
             }
 
+            let deductionAmount = billAmount - receivedAmount;
+            row.querySelector(".deduction").innerText = deductionAmount.toFixed(2);
+            row.querySelector(".deductionPercentage").innerText = percentage.toFixed(2) + "% " + deductionDetails;
 
-       function deleteRow(button) {
+            // Update the input fields with calculated values
+            row.querySelector(".billAmount").value = billAmount.toFixed(2);
+            row.querySelector(".receivedAmount").value = receivedAmount.toFixed(2);
+
+            // Calculate totals
+            calculateTotals();
+        }
+
+
+        function deleteRow(button) {
             let row = button.parentNode.parentNode;
             row.parentNode.removeChild(row);
             calculateTotals();
+        }
+        function clearRow(button) {
+            let row = button.parentNode.parentNode;
+            row.querySelector(".billAmount").value = "";
+            row.querySelector(".receivedAmount").value = "";
+            row.querySelector(".deduction").innerText = "0.00";
+            row.querySelector(".deductionPercentage").innerText = "0.00%";
+            calculateTotals();
+        }
+        function clearFields() {
+            document.getElementById("manualBilled").value = "";
+            document.getElementById("manualReceived").value = "";
+            document.getElementById("manualDeduction").innerText = "0.00";
+            document.getElementById("manualDeductionPercentage").innerText = "0.00%";
         }
         function exportToExcel() {
             let table = document.getElementById("billTable");
