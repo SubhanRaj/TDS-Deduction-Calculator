@@ -95,19 +95,19 @@ function addRow() {
     .getElementsByTagName("tbody")[0];
   let newRow = table.insertRow();
   newRow.innerHTML = `
-                <td data-label="Bill Number"><input type="text" class="form-control"></td>
-                <td data-label="Date"><input type="date" class="form-control"></td>
-                <td data-label="Bill Amount (₹)"><input type="number" class="form-control billAmount" onblur="updateRow(this)"></td>
-                <td data-label="Deduction (₹)" class="deduction">0.00</td>
-                <td data-label="Deduction Percentage & Type" class="deductionPercentage">0.00%</td>
-                <td data-label="Amount Received (₹)"><input type="number" class="form-control receivedAmount" onblur="updateRow(this)"></td>
-                <td data-label="Action">
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-danger btn-sm" onclick="deleteRow(this)">Delete</button>
-                        <button class="btn btn-secondary btn-sm" onclick="clearRow(this)">Clear</button>
-                    </div>
-                </td>
-            `;
+    <td data-label="Bill Number"><input type="text" class="form-control"></td>
+    <td data-label="Date"><input type="date" class="form-control"></td>
+    <td data-label="Bill Amount (₹)"><input type="number" class="form-control billAmount" onblur="updateRow(this)"></td>
+    <td data-label="Deduction (₹)" class="deduction">0.00</td>
+    <td data-label="Deduction Percentage & Type" class="deductionPercentage">0.00%</td>
+    <td data-label="Amount Received (₹)"><input type="number" class="form-control receivedAmount" onblur="updateRow(this)"></td>
+    <td data-label="Action">
+      <div class="d-flex gap-2">
+        <button class="btn btn-danger btn-sm" onclick="deleteRow(this)">Delete</button>
+        <button class="btn btn-secondary btn-sm" onclick="clearRow(this)">Clear</button>
+      </div>
+    </td>
+  `;
   calculateTotals();
   saveToLocalStorage();
 }
@@ -251,13 +251,17 @@ function loadFromLocalStorage() {
 }
 function exportToExcel() {
   let table = document.getElementById("billTable");
+  if (!table) {
+    alert("Table not found!");
+    return;
+  }
   let wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
-  XLSX.writeFile(wb, "Bill_Management.xlsx");
+  XLSX.writeFile(wb, "TDS & GST Deduction.xlsx");
 }
 
 function exportToPDF() {
   const { jsPDF } = window.jspdf;
-  let doc = new jsPDF();
+  const doc = new jsPDF();
   doc.text("Bill Management Data", 10, 10);
 
   // Use autoTable plugin
@@ -267,5 +271,5 @@ function exportToPDF() {
     theme: "grid",
   });
 
-  doc.save("Bill_Management.pdf");
+  doc.save("TDS & GST Deduction.pdf");
 }
