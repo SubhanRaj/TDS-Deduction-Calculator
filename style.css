@@ -4,7 +4,11 @@
   button,
   .btn,
   input[type="file"],
+  input[type="checkbox"],
   #summaryDashboard,
+  #deleteSelectedBtn,
+  .table th:first-child,
+  .table td:first-child,
   .mb-4.p-3.bg-light.border.rounded:first-of-type {
     display: none !important;
   }
