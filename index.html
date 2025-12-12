@@ -124,6 +124,9 @@
             <table class="table table-bordered" id="billTable">
                 <thead class="table-light text-center">
                     <tr>
+                        <th style="width: 50px;">
+                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" title="Select all bills" aria-label="Select all bills">
+                        </th>
                         <th>Bill Number</th>
                         <th>Date</th>
                         <th>Bill Amount (₹)</th>
@@ -139,6 +142,9 @@
         <div class="text-center my-3 d-flex flex-column flex-md-row gap-2 justify-content-center">
             <button onclick="addRow()" class="btn btn-primary mb-2 mb-md-0" title="Ctrl/Cmd + N">
                 <i class="fas fa-plus"></i> Add Bill
+            </button>
+            <button onclick="deleteSelectedRows()" class="btn btn-warning mb-2 mb-md-0" id="deleteSelectedBtn" style="display: none;">
+                <i class="fas fa-trash-alt"></i> Delete Selected
             </button>
             <button onclick="exportToExcel()" class="btn btn-success mb-2 mb-md-0" title="Ctrl/Cmd + E">
                 <i class="fas fa-file-excel"></i> Export to Excel

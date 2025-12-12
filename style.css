@@ -78,6 +78,25 @@ select:focus {
   outline-offset: 2px;
 }
 
+/* Checkbox Styling */
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #0d6efd;
+}
+
+#selectAll {
+  width: 22px;
+  height: 22px;
+}
+
+.table td:first-child,
+.table th:first-child {
+  text-align: center;
+  vertical-align: middle;
+}
+
 /* Toast positioning for mobile */
 .toastify {
   font-family: inherit;

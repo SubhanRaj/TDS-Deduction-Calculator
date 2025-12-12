@@ -262,10 +262,12 @@ function calculateTotals() {
   document.getElementById("totalDeductionPercentage").innerText =
     totalPercentage.toFixed(2) + "% " + totalDeductionDetails;
 
-  // Sync with top manual calculation fields if they have bills
-  if (totalBilled > 0 && !document.getElementById("manualBilled").value && !document.getElementById("manualReceived").value) {
-    document.getElementById("manualBilled").value = totalBilled.toFixed(2);
-    document.getElementById("manualReceived").value = totalReceived.toFixed(2);
+  // Only sync deduction info to top, don't auto-fill amounts unless both are empty
+  const manualBilled = document.getElementById("manualBilled").value;
+  const manualReceived = document.getElementById("manualReceived").value;
+  
+  if (totalBilled > 0 && !manualBilled && !manualReceived) {
+    // Only update deduction display, not the input fields
     document.getElementById("manualDeduction").innerText = totalDeducted.toFixed(2);
     document.getElementById("manualDeductionPercentage").innerText =
       totalPercentage.toFixed(2) + "% " + totalDeductionDetails;
@@ -284,6 +286,7 @@ function addRow() {
   const today = new Date().toISOString().split('T')[0];
   
   newRow.innerHTML = `
+    <td data-label="Select"><input type="checkbox" class="row-checkbox" onchange="updateDeleteButton()" aria-label="Select bill"></td>
     <td data-label="Bill Number"><input type="text" class="form-control" aria-label="Bill Number"></td>
     <td data-label="Date"><input type="date" class="form-control" value="${today}" aria-label="Date"></td>
     <td data-label="Bill Amount (₹)"><input type="number" class="form-control billAmount" min="0" step="0.01" onblur="updateRow(this)" aria-label="Bill Amount"></td>
@@ -292,9 +295,9 @@ function addRow() {
     <td data-label="Amount Received (₹)"><input type="number" class="form-control receivedAmount" min="0" step="0.01" onblur="updateRow(this)" aria-label="Amount Received"></td>
     <td data-label="Action">
       <div class="d-flex gap-2">
-        <button class="btn btn-danger btn-sm" onclick="deleteRow(this)" aria-label="Delete row"><i class="fas fa-trash"></i></button>
-        <button class="btn btn-secondary btn-sm" onclick="clearRow(this)" aria-label="Clear row"><i class="fas fa-eraser"></i></button>
-        <button class="btn btn-info btn-sm" onclick="copyRow(this)" aria-label="Copy row"><i class="fas fa-copy"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRow(this)" aria-label="Delete row" title="Delete this bill"><i class="fas fa-trash"></i></button>
+        <button class="btn btn-secondary btn-sm" onclick="clearRow(this)" aria-label="Clear row" title="Clear row data"><i class="fas fa-eraser"></i></button>
+        <button class="btn btn-info btn-sm" onclick="copyRow(this)" aria-label="Copy row" title="Copy bill details"><i class="fas fa-copy"></i></button>
       </div>
     </td>
   `;
@@ -310,10 +313,21 @@ function updateRow(input) {
   let billAmount = parseFloat(row.querySelector(".billAmount").value) || 0;
   let receivedAmount =
     parseFloat(row.querySelector(".receivedAmount").value) || 0;
-  let percentage =
-    parseFloat(
-      document.getElementById("manualDeductionPercentage").innerText
-    ) || 0;
+  
+  // Get percentage from manual deduction field, or use default logic
+  let percentage = parseFloat(document.getElementById("manualDeductionPercentage").innerText) || 0;
+  
+  // If no percentage set yet, use the selected/default percentage logic
+  if (percentage === 0 && (billAmount > 0 || receivedAmount > 0)) {
+    if (billAmount > 0) {
+      percentage = getSelectedPercentage(billAmount);
+    } else if (receivedAmount > 0) {
+      // Estimate billed amount to determine percentage
+      let estimatedBilled = receivedAmount / (1 - 2.24 / 100);
+      percentage = getSelectedPercentage(estimatedBilled);
+    }
+  }
+  
   let deductionDetails = getDeductionDetails(percentage);
 
   if (billAmount) {
@@ -457,16 +471,18 @@ function loadFromLocalStorage() {
   tableData.forEach((rowData) => {
     const newRow = tableBody.insertRow();
     newRow.innerHTML = `
-                <td data-label="Bill Number"><input type="text" class="form-control" value="${rowData.billNumber}"></td>
-                <td data-label="Date"><input type="date" class="form-control" value="${rowData.date}"></td>
-                <td data-label="Bill Amount (₹)"><input type="number" class="form-control billAmount" value="${rowData.billAmount}" onblur="updateRow(this)"></td>
+                <td data-label="Select"><input type="checkbox" class="row-checkbox" onchange="updateDeleteButton()" aria-label="Select bill"></td>
+                <td data-label="Bill Number"><input type="text" class="form-control" value="${rowData.billNumber}" aria-label="Bill Number"></td>
+                <td data-label="Date"><input type="date" class="form-control" value="${rowData.date}" aria-label="Date"></td>
+                <td data-label="Bill Amount (₹)"><input type="number" class="form-control billAmount" value="${rowData.billAmount}" min="0" step="0.01" onblur="updateRow(this)" aria-label="Bill Amount"></td>
                 <td data-label="Deduction (₹)" class="deduction">${rowData.deduction}</td>
                 <td data-label="Deduction Percentage & Type" class="deductionPercentage">${rowData.deductionPercentage}</td>
-                <td data-label="Amount Received (₹)"><input type="number" class="form-control receivedAmount" value="${rowData.amountReceived}" onblur="updateRow(this)"></td>
+                <td data-label="Amount Received (₹)"><input type="number" class="form-control receivedAmount" value="${rowData.amountReceived}" min="0" step="0.01" onblur="updateRow(this)" aria-label="Amount Received"></td>
                 <td data-label="Action">
                     <div class="d-flex gap-2">
-                        <button class="btn btn-danger btn-sm" onclick="deleteRow(this)">Delete</button>
-                        <button class="btn btn-secondary btn-sm" onclick="clearRow(this)">Clear</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteRow(this)" aria-label="Delete row" title="Delete this bill"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-secondary btn-sm" onclick="clearRow(this)" aria-label="Clear row" title="Clear row data"><i class="fas fa-eraser"></i></button>
+                        <button class="btn btn-info btn-sm" onclick="copyRow(this)" aria-label="Copy row" title="Copy bill details"><i class="fas fa-copy"></i></button>
                     </div>
                 </td>
             `;
@@ -555,7 +571,20 @@ function exportToPDF() {
 // Dashboard update function
 function updateDashboard() {
   const rows = document.querySelectorAll("#billTable tbody tr");
-  const totalBills = rows.length;
+  
+  let billAmounts = [];
+  let dates = [];
+  
+  rows.forEach((row) => {
+    const billAmount = parseFloat(row.querySelector(".billAmount").value) || 0;
+    const date = row.querySelector("input[type='date']").value;
+    
+    if (billAmount > 0) billAmounts.push(billAmount);
+    if (date && billAmount > 0) dates.push(new Date(date));
+  });
+  
+  // Only show dashboard if there are bills with actual amounts
+  const totalBills = billAmounts.length;
   
   if (totalBills === 0) {
     document.getElementById("summaryDashboard").style.display = "none";
@@ -564,20 +593,8 @@ function updateDashboard() {
   
   document.getElementById("summaryDashboard").style.display = "block";
   
-  let billAmounts = [];
-  let dates = [];
-  let totalDeductionPercentage = 0;
-  
-  rows.forEach((row) => {
-    const billAmount = parseFloat(row.querySelector(".billAmount").value) || 0;
-    const date = row.querySelector("input[type='date']").value;
-    
-    if (billAmount > 0) billAmounts.push(billAmount);
-    if (date) dates.push(new Date(date));
-  });
-  
   // Calculate stats
-  const highestBill = billAmounts.length > 0 ? Math.max(...billAmounts) : 0;
+  const highestBill = Math.max(...billAmounts);
   const avgDeduction = document.getElementById("totalDeductionPercentage").innerText.split('%')[0];
   
   // Date range
@@ -678,4 +695,69 @@ function handleExcelImport(event) {
   
   // Reset file input
   event.target.value = '';
+}
+
+// Bulk operations functions
+function toggleSelectAll() {
+  const selectAll = document.getElementById("selectAll");
+  const checkboxes = document.querySelectorAll(".row-checkbox");
+  
+  checkboxes.forEach((checkbox) => {
+    checkbox.checked = selectAll.checked;
+  });
+  
+  updateDeleteButton();
+}
+
+function updateDeleteButton() {
+  const checkboxes = document.querySelectorAll(".row-checkbox:checked");
+  const deleteBtn = document.getElementById("deleteSelectedBtn");
+  
+  if (checkboxes.length > 0) {
+    deleteBtn.style.display = "inline-block";
+    deleteBtn.innerHTML = `<i class="fas fa-trash-alt"></i> Delete Selected (${checkboxes.length})`;
+  } else {
+    deleteBtn.style.display = "none";
+  }
+  
+  // Update "Select All" checkbox state
+  const allCheckboxes = document.querySelectorAll(".row-checkbox");
+  const selectAll = document.getElementById("selectAll");
+  selectAll.checked = allCheckboxes.length > 0 && checkboxes.length === allCheckboxes.length;
+}
+
+function deleteSelectedRows() {
+  const checkboxes = document.querySelectorAll(".row-checkbox:checked");
+  
+  if (checkboxes.length === 0) {
+    showToast("No bills selected", "warning");
+    return;
+  }
+  
+  Swal.fire({
+    title: `Delete ${checkboxes.length} bill(s)?`,
+    text: "This action cannot be undone!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: `Yes, delete ${checkboxes.length} bill(s)!`,
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      checkboxes.forEach((checkbox) => {
+        const row = checkbox.closest("tr");
+        row.parentNode.removeChild(row);
+      });
+      
+      calculateTotals();
+      saveToLocalStorage();
+      updateDeleteButton();
+      
+      // Reset select all checkbox
+      document.getElementById("selectAll").checked = false;
+      
+      showToast(`🗑️ ${checkboxes.length} bill(s) deleted`, "success");
+    }
+  });
 }
