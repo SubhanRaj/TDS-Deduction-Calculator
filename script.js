@@ -17,11 +17,6 @@ document.addEventListener("DOMContentLoaded", function () {
   loadFromLocalStorage();
   setupKeyboardShortcuts();
   setupCompanyInfoListeners();
-  
-  // Show auto-save notification on load
-  setTimeout(() => {
-    showToast("💾 Your data is saved automatically to this browser", "info");
-  }, 1000);
 });
 
 // Toast notification helper (works offline if CDN fails)
