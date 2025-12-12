@@ -300,7 +300,6 @@ function addRow() {
   `;
   calculateTotals();
   saveToLocalStorage();
-  showToast("✅ New bill added", "info");
   
   // Focus on the bill number input
   newRow.querySelector("input").focus();
