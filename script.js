@@ -159,6 +159,31 @@ function manualCalculation() {
     return;
   }
 
+  // If no manual input but table has bills, use table totals
+  if (!billed && !received) {
+    const tableBilled = parseFloat(document.getElementById("totalBilled").innerText) || 0;
+    const tableReceived = parseFloat(document.getElementById("totalReceived").innerText) || 0;
+    
+    if (tableBilled > 0) {
+      billed = tableBilled;
+      received = tableReceived;
+      percentage = ((tableBilled - tableReceived) / tableBilled) * 100;
+      deductionDetails = getDeductionDetails(percentage);
+      
+      document.getElementById("manualBilled").value = billed.toFixed(2);
+      document.getElementById("manualReceived").value = received.toFixed(2);
+      document.getElementById("manualDeduction").innerText = (billed - received).toFixed(2);
+      document.getElementById("manualDeductionPercentage").innerText =
+        percentage.toFixed(2) + "% " + deductionDetails;
+      
+      showToast("✅ Calculated from table totals", "info");
+      return;
+    } else {
+      showToast("Please enter an amount or add bills to the table", "warning");
+      return;
+    }
+  }
+
   if (billed) {
     percentage = getSelectedPercentage(billed);
     deductionDetails = getDeductionDetails(percentage);
@@ -230,11 +255,21 @@ function calculateTotals() {
     totalDeductionDetails = "2.24% TDS";
   }
 
+  // Update bottom totals
   document.getElementById("totalBilled").innerText = totalBilled.toFixed(2);
   document.getElementById("totalDeducted").innerText = totalDeducted.toFixed(2);
   document.getElementById("totalReceived").innerText = totalReceived.toFixed(2);
   document.getElementById("totalDeductionPercentage").innerText =
     totalPercentage.toFixed(2) + "% " + totalDeductionDetails;
+
+  // Sync with top manual calculation fields if they have bills
+  if (totalBilled > 0 && !document.getElementById("manualBilled").value && !document.getElementById("manualReceived").value) {
+    document.getElementById("manualBilled").value = totalBilled.toFixed(2);
+    document.getElementById("manualReceived").value = totalReceived.toFixed(2);
+    document.getElementById("manualDeduction").innerText = totalDeducted.toFixed(2);
+    document.getElementById("manualDeductionPercentage").innerText =
+      totalPercentage.toFixed(2) + "% " + totalDeductionDetails;
+  }
 
   updateDashboard();
   saveToLocalStorage();
