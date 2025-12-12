@@ -24,6 +24,29 @@
     <title>TDS & GST Deduction Calculator</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='15' fill='%234CAF50'/%3E%3Ctext x='50' y='38' font-family='Arial, sans-serif' font-size='40' font-weight='bold' fill='white' text-anchor='middle'%3E₹%3C/text%3E%3Crect x='20' y='50' width='60' height='6' rx='3' fill='white'/%3E%3Ctext x='50' y='75' font-family='Arial, sans-serif' font-size='14' font-weight='bold' fill='white' text-anchor='middle'%3ETDS%3C/text%3E%3C/svg%3E" />
     <link rel="manifest" href="manifest.json" />
+    <link rel="canonical" href="https://tds-deduction-calculator.pages.dev/" />
+    
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "TDS & GST Deduction Calculator",
+      "url": "https://tds-deduction-calculator.pages.dev",
+      "description": "Professional TDS & GST deduction calculator for freelancers, contractors, and businesses. Calculate tax deductions, track multiple bills, export to Excel/PDF, and work offline.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "INR"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "SubhanRaj"
+      }
+    }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
@@ -179,6 +202,9 @@
             <button onclick="copyToClipboard()" class="btn btn-outline-primary">
                 <i class="fas fa-copy"></i> Copy Totals
             </button>
+            <button onclick="showInstallPrompt()" class="btn btn-outline-success no-print" id="installAppBtn" style="display: none;" title="Install this app">
+                <i class="fas fa-download"></i> Install App
+            </button>
         </div>
         <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display: none;" onchange="handleExcelImport(event)" />
 
@@ -224,23 +250,54 @@
             e.preventDefault();
             deferredPrompt = e;
             
-            // Show custom install button after a delay
+            // Show install button
+            const installBtn = document.getElementById('installAppBtn');
+            if (installBtn) {
+                installBtn.style.display = 'inline-block';
+            }
+            
+            // Show custom install popup after a delay
             setTimeout(() => {
-                if (deferredPrompt && typeof toastr !== 'undefined') {
-                    toastr.info(
-                        '<div style="cursor: pointer;" onclick="installPWA()">📱 Install this app for offline access and better experience!</div>',
-                        'Install App',
-                        {
-                            closeButton: true,
-                            timeOut: 0,
-                            extendedTimeOut: 0,
-                            tapToDismiss: false,
-                            positionClass: 'toast-bottom-center'
-                        }
-                    );
+                if (deferredPrompt) {
+                    showInstallPrompt();
                 }
             }, 3000);
         });
+
+        function showInstallPrompt() {
+            if (!deferredPrompt || typeof Swal === 'undefined') return;
+            
+            Swal.fire({
+                title: '📱 Install App',
+                html: `
+                    <div style="text-align: left; padding: 10px;">
+                        <p><strong>Get the best experience by installing this app!</strong></p>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>✅ Works offline</li>
+                            <li>✅ Quick access from home screen</li>
+                            <li>✅ No browser address bar</li>
+                            <li>✅ Faster loading</li>
+                            <li>✅ Native app experience</li>
+                        </ul>
+                    </div>
+                `,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#4CAF50',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '📥 Install Now',
+                cancelButtonText: 'Maybe Later',
+                allowOutsideClick: false,
+                customClass: {
+                    container: 'install-prompt-container',
+                    popup: 'install-prompt-popup'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    installPWA();
+                }
+            });
+        }
 
         function installPWA() {
             if (deferredPrompt) {
@@ -248,9 +305,17 @@
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
                         console.log('User accepted the install prompt');
-                        if (typeof toastr !== 'undefined') {
-                            toastr.success('App installed successfully! 🎉');
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: 'Installed! 🎉',
+                                text: 'The app has been installed successfully. You can now use it offline!',
+                                icon: 'success',
+                                confirmButtonColor: '#4CAF50',
+                                timer: 3000
+                            });
                         }
+                    } else {
+                        console.log('User dismissed the install prompt');
                     }
                     deferredPrompt = null;
                 });
@@ -259,9 +324,13 @@
 
         // Check if app is installed
         window.addEventListener('appinstalled', () => {
-            console.log('PWA installed');
-            if (typeof toastr !== 'undefined') {
-                toastr.success('App installed! You can now use it offline. 🎉');
+            console.log('PWA installed successfully');
+            deferredPrompt = null;
+            
+            // Hide install button
+            const installBtn = document.getElementById('installAppBtn');
+            if (installBtn) {
+                installBtn.style.display = 'none';
             }
         });
 

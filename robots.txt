@@ -1,0 +1,9 @@
+# robots.txt for TDS & GST Deduction Calculator
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://tds-deduction-calculator.pages.dev/sitemap.xml
+
+# Disallow admin or private paths (if any in future)
+# Disallow: /admin/

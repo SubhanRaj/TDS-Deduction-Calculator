@@ -1,0 +1,43 @@
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "TDS & GST Deduction Calculator",
+  "alternateName": "TDS Calculator",
+  "url": "https://tds-deduction-calculator.pages.dev",
+  "description": "Professional TDS & GST deduction calculator for freelancers, contractors, and businesses. Calculate tax deductions, track multiple bills, export to Excel/PDF, and work offline.",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "SubhanRaj",
+    "url": "https://github.com/SubhanRaj"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "5",
+    "ratingCount": "1"
+  },
+  "featureList": [
+    "TDS and GST calculation",
+    "Bill management",
+    "Export to Excel and PDF",
+    "Offline support",
+    "Progressive Web App",
+    "Local data storage",
+    "Multiple bill tracking",
+    "Summary dashboard"
+  ],
+  "screenshot": "https://tds-deduction-calculator.pages.dev/",
+  "softwareVersion": "1.0.0",
+  "datePublished": "2025-12-12",
+  "inLanguage": "en-IN",
+  "countryOfOrigin": {
+    "@type": "Country",
+    "name": "India"
+  }
+}
