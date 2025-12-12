@@ -1,6 +1,91 @@
 document.addEventListener("DOMContentLoaded", function () {
+  // Configure Toastr
+  if (typeof toastr !== "undefined") {
+    toastr.options = {
+      closeButton: true,
+      progressBar: true,
+      positionClass: "toast-top-right",
+      timeOut: 3000,
+      extendedTimeOut: 1000,
+      showEasing: "swing",
+      hideEasing: "linear",
+      showMethod: "fadeIn",
+      hideMethod: "fadeOut",
+    };
+  }
+  
   loadFromLocalStorage();
+  setupKeyboardShortcuts();
+  setupCompanyInfoListeners();
+  
+  // Show auto-save notification on load
+  setTimeout(() => {
+    showToast("💾 Your data is saved automatically to this browser", "info");
+  }, 1000);
 });
+
+// Toast notification helper (works offline if CDN fails)
+function showToast(message, type = "success") {
+  if (typeof toastr !== "undefined") {
+    switch (type) {
+      case "success":
+        toastr.success(message);
+        break;
+      case "error":
+        toastr.error(message);
+        break;
+      case "info":
+        toastr.info(message);
+        break;
+      case "warning":
+        toastr.warning(message);
+        break;
+      default:
+        toastr.success(message);
+    }
+  } else {
+    // Fallback for offline mode
+    console.log(`${type.toUpperCase()}: ${message}`);
+  }
+}
+
+// Keyboard shortcuts (cross-platform Ctrl/Cmd)
+function setupKeyboardShortcuts() {
+  document.addEventListener("keydown", function (e) {
+    const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+    const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+    // Prevent default browser shortcuts
+    if (modKey) {
+      if (e.key === "n" || e.key === "N") {
+        e.preventDefault();
+        addRow();
+      } else if (e.key === "e" || e.key === "E") {
+        e.preventDefault();
+        exportToExcel();
+      } else if (e.key === "s" || e.key === "S") {
+        e.preventDefault();
+        saveToLocalStorage(true);
+      }
+    }
+
+    // Enter key to calculate
+    if (e.key === "Enter" && (e.target.id === "manualBilled" || e.target.id === "manualReceived")) {
+      e.preventDefault();
+      manualCalculation();
+    }
+  });
+}
+
+// Company info listeners
+function setupCompanyInfoListeners() {
+  document.getElementById("companyName").addEventListener("change", function() {
+    saveToLocalStorage(true);
+  });
+  document.getElementById("panNumber").addEventListener("change", function() {
+    saveToLocalStorage(true);
+  });
+}
 
 function handlePercentageChange() {
   const select = document.getElementById("deductionPercentageSelect");
@@ -67,6 +152,12 @@ function manualCalculation() {
     parseFloat(document.getElementById("manualReceived").value) || 0;
   let percentage = 0;
   let deductionDetails = "";
+
+  // Input validation
+  if (billed < 0 || received < 0) {
+    showToast("Amount cannot be negative!", "error");
+    return;
+  }
 
   if (billed) {
     percentage = getSelectedPercentage(billed);
@@ -145,6 +236,7 @@ function calculateTotals() {
   document.getElementById("totalDeductionPercentage").innerText =
     totalPercentage.toFixed(2) + "% " + totalDeductionDetails;
 
+  updateDashboard();
   saveToLocalStorage();
 }
 function addRow() {
@@ -152,22 +244,31 @@ function addRow() {
     .getElementById("billTable")
     .getElementsByTagName("tbody")[0];
   let newRow = table.insertRow();
+  
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0];
+  
   newRow.innerHTML = `
-    <td data-label="Bill Number"><input type="text" class="form-control"></td>
-    <td data-label="Date"><input type="date" class="form-control"></td>
-    <td data-label="Bill Amount (₹)"><input type="number" class="form-control billAmount" onblur="updateRow(this)"></td>
+    <td data-label="Bill Number"><input type="text" class="form-control" aria-label="Bill Number"></td>
+    <td data-label="Date"><input type="date" class="form-control" value="${today}" aria-label="Date"></td>
+    <td data-label="Bill Amount (₹)"><input type="number" class="form-control billAmount" min="0" step="0.01" onblur="updateRow(this)" aria-label="Bill Amount"></td>
     <td data-label="Deduction (₹)" class="deduction">0.00</td>
     <td data-label="Deduction Percentage & Type" class="deductionPercentage">0.00%</td>
-    <td data-label="Amount Received (₹)"><input type="number" class="form-control receivedAmount" onblur="updateRow(this)"></td>
+    <td data-label="Amount Received (₹)"><input type="number" class="form-control receivedAmount" min="0" step="0.01" onblur="updateRow(this)" aria-label="Amount Received"></td>
     <td data-label="Action">
       <div class="d-flex gap-2">
-        <button class="btn btn-danger btn-sm" onclick="deleteRow(this)">Delete</button>
-        <button class="btn btn-secondary btn-sm" onclick="clearRow(this)">Clear</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRow(this)" aria-label="Delete row"><i class="fas fa-trash"></i></button>
+        <button class="btn btn-secondary btn-sm" onclick="clearRow(this)" aria-label="Clear row"><i class="fas fa-eraser"></i></button>
+        <button class="btn btn-info btn-sm" onclick="copyRow(this)" aria-label="Copy row"><i class="fas fa-copy"></i></button>
       </div>
     </td>
   `;
   calculateTotals();
   saveToLocalStorage();
+  showToast("✅ New bill added", "info");
+  
+  // Focus on the bill number input
+  newRow.querySelector("input").focus();
 }
 
 function updateRow(input) {
@@ -202,10 +303,25 @@ function updateRow(input) {
 }
 
 function deleteRow(button) {
-  let row = button.closest("tr");
-  row.parentNode.removeChild(row);
-  calculateTotals();
-  saveToLocalStorage();
+  // Confirm before deleting with SweetAlert2
+  Swal.fire({
+    title: 'Delete this bill?',
+    text: "This action cannot be undone!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      let row = button.closest("tr");
+      row.parentNode.removeChild(row);
+      calculateTotals();
+      saveToLocalStorage();
+      showToast("🗑️ Bill deleted", "info");
+    }
+  });
 }
 function clearRow(button) {
   let row = button.closest("tr");
@@ -217,19 +333,33 @@ function clearRow(button) {
   saveToLocalStorage();
 }
 function clearFields() {
-  document.getElementById("manualBilled").value = "";
-  document.getElementById("manualReceived").value = "";
-  document.getElementById("manualDeduction").innerText = "0.00";
-  document.getElementById("manualDeductionPercentage").innerText = "0.00%";
-  document.getElementById("deductionPercentageSelect").value = "auto";
-  document.getElementById("customPercentage").value = "";
-  document.getElementById("customPercentage").style.display = "none";
-  document.querySelector("#billTable tbody").innerHTML = "";
-  localStorage.removeItem("tableData");
-  localStorage.removeItem("totals");
-  calculateTotals();
+  Swal.fire({
+    title: 'Clear all data?',
+    text: "This will delete all bills and reset everything. This action cannot be undone!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Yes, clear everything!',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      document.getElementById("manualBilled").value = "";
+      document.getElementById("manualReceived").value = "";
+      document.getElementById("manualDeduction").innerText = "0.00";
+      document.getElementById("manualDeductionPercentage").innerText = "0.00%";
+      document.getElementById("deductionPercentageSelect").value = "auto";
+      document.getElementById("customPercentage").value = "";
+      document.getElementById("customPercentage").style.display = "none";
+      document.querySelector("#billTable tbody").innerHTML = "";
+      localStorage.removeItem("tableData");
+      localStorage.removeItem("totals");
+      calculateTotals();
+      showToast("🧹 All data cleared", "info");
+    }
+  });
 }
-function saveToLocalStorage() {
+function saveToLocalStorage(showNotification = false) {
   const tableData = [];
   document.querySelectorAll("#billTable tbody tr").forEach((row) => {
     const rowData = {
@@ -258,10 +388,16 @@ function saveToLocalStorage() {
     ).innerText,
     deductionPercentageSelect: document.getElementById("deductionPercentageSelect").value,
     customPercentage: document.getElementById("customPercentage").value,
+    companyName: document.getElementById("companyName").value,
+    panNumber: document.getElementById("panNumber").value,
   };
 
   localStorage.setItem("tableData", JSON.stringify(tableData));
   localStorage.setItem("totals", JSON.stringify(totals));
+  
+  if (showNotification) {
+    showToast("💾 Data saved locally", "success");
+  }
 }
 
 function loadFromLocalStorage() {
@@ -277,6 +413,8 @@ function loadFromLocalStorage() {
     manualDeductionPercentage: "0.00%",
     deductionPercentageSelect: "auto",
     customPercentage: "",
+    companyName: "",
+    panNumber: "",
   };
 
   const tableBody = document.querySelector("#billTable tbody");
@@ -312,11 +450,20 @@ function loadFromLocalStorage() {
     totals.manualDeductionPercentage;
   document.getElementById("deductionPercentageSelect").value = totals.deductionPercentageSelect || "auto";
   document.getElementById("customPercentage").value = totals.customPercentage || "";
+  document.getElementById("companyName").value = totals.companyName || "";
+  document.getElementById("panNumber").value = totals.panNumber || "";
   
   // Show custom input if custom was selected
   if (totals.deductionPercentageSelect === "custom") {
     document.getElementById("customPercentage").style.display = "block";
   }
+  
+  // Update company name for print
+  if (totals.companyName) {
+    document.querySelector(".container").setAttribute("data-company-name", totals.companyName);
+  }
+  
+  updateDashboard();
 }
 function exportToExcel() {
   let table = document.getElementById("billTable");
@@ -324,21 +471,177 @@ function exportToExcel() {
     alert("Table not found!");
     return;
   }
+  
+  const companyName = document.getElementById("companyName").value || "TDS-GST";
+  const date = new Date().toISOString().split('T')[0];
+  const filename = `${companyName.replace(/\s+/g, '-')}_TDS-Deduction_${date}.xlsx`;
+  
   let wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
-  XLSX.writeFile(wb, "TDS & GST Deduction.xlsx");
+  XLSX.writeFile(wb, filename);
+  showToast("Exported to Excel successfully!", "success");
 }
 
 function exportToPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  doc.text("Bill Management Data", 10, 10);
+  
+  const companyName = document.getElementById("companyName").value || "TDS & GST Deduction Calculator";
+  const panNumber = document.getElementById("panNumber").value;
+  const date = new Date().toLocaleDateString();
+  
+  // Add header
+  doc.setFontSize(16);
+  doc.text(companyName, 105, 15, { align: "center" });
+  doc.setFontSize(10);
+  doc.text(`Date: ${date}`, 105, 22, { align: "center" });
+  if (panNumber) {
+    doc.text(`PAN: ${panNumber}`, 105, 28, { align: "center" });
+  }
 
   // Use autoTable plugin
   doc.autoTable({
     html: "#billTable",
-    startY: 20,
+    startY: panNumber ? 32 : 26,
     theme: "grid",
+    headStyles: { fillColor: [76, 175, 80] },
   });
+  
+  // Add totals
+  const finalY = doc.lastAutoTable.finalY + 10;
+  doc.setFontSize(12);
+  doc.text(`Total Billed: ₹${document.getElementById("totalBilled").innerText}`, 14, finalY);
+  doc.text(`Total Deducted: ₹${document.getElementById("totalDeducted").innerText}`, 14, finalY + 7);
+  doc.text(`Total Received: ₹${document.getElementById("totalReceived").innerText}`, 14, finalY + 14);
 
-  doc.save("TDS & GST Deduction.pdf");
+  const filename = `${companyName.replace(/\s+/g, '-')}_${date.replace(/\//g, '-')}.pdf`;
+  doc.save(filename);
+  showToast("Exported to PDF successfully!", "success");
+}
+
+// Dashboard update function
+function updateDashboard() {
+  const rows = document.querySelectorAll("#billTable tbody tr");
+  const totalBills = rows.length;
+  
+  if (totalBills === 0) {
+    document.getElementById("summaryDashboard").style.display = "none";
+    return;
+  }
+  
+  document.getElementById("summaryDashboard").style.display = "block";
+  
+  let billAmounts = [];
+  let dates = [];
+  let totalDeductionPercentage = 0;
+  
+  rows.forEach((row) => {
+    const billAmount = parseFloat(row.querySelector(".billAmount").value) || 0;
+    const date = row.querySelector("input[type='date']").value;
+    
+    if (billAmount > 0) billAmounts.push(billAmount);
+    if (date) dates.push(new Date(date));
+  });
+  
+  // Calculate stats
+  const highestBill = billAmounts.length > 0 ? Math.max(...billAmounts) : 0;
+  const avgDeduction = document.getElementById("totalDeductionPercentage").innerText.split('%')[0];
+  
+  // Date range
+  let dateRange = "-";
+  if (dates.length > 0) {
+    dates.sort((a, b) => a - b);
+    const firstDate = dates[0].toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    const lastDate = dates[dates.length - 1].toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    dateRange = firstDate === lastDate ? firstDate : `${firstDate} - ${lastDate}`;
+  }
+  
+  // Update dashboard
+  document.getElementById("dashTotalBills").innerText = totalBills;
+  document.getElementById("dashAvgDeduction").innerText = avgDeduction + "%";
+  document.getElementById("dashHighest").innerText = "₹" + highestBill.toFixed(2);
+  document.getElementById("dashDateRange").innerText = dateRange;
+}
+
+// Copy to clipboard function
+function copyToClipboard() {
+  const totalBilled = document.getElementById("totalBilled").innerText;
+  const totalDeducted = document.getElementById("totalDeducted").innerText;
+  const totalReceived = document.getElementById("totalReceived").innerText;
+  const deductionPercentage = document.getElementById("totalDeductionPercentage").innerText;
+  
+  const text = `TDS & GST Deduction Summary\n` +
+    `Total Billed: ₹${totalBilled}\n` +
+    `Total Deducted: ₹${totalDeducted}\n` +
+    `Total Received: ₹${totalReceived}\n` +
+    `Deduction: ${deductionPercentage}`;
+  
+  navigator.clipboard.writeText(text).then(() => {
+    showToast("Totals copied to clipboard!", "success");
+  }).catch(() => {
+    showToast("Failed to copy. Please try again.", "error");
+  });
+}
+
+// Copy individual row
+function copyRow(button) {
+  const row = button.closest("tr");
+  const billNumber = row.querySelector("td:nth-child(1) input").value;
+  const date = row.querySelector("td:nth-child(2) input").value;
+  const billAmount = row.querySelector(".billAmount").value;
+  const deduction = row.querySelector(".deduction").innerText;
+  const received = row.querySelector(".receivedAmount").value;
+  
+  const text = `Bill: ${billNumber}\nDate: ${date}\nAmount: ₹${billAmount}\nDeduction: ₹${deduction}\nReceived: ₹${received}`;
+  
+  navigator.clipboard.writeText(text).then(() => {
+    showToast("Bill details copied!", "success");
+  }).catch(() => {
+    showToast("Failed to copy.", "error");
+  });
+}
+
+// Import from Excel
+function importFromExcel() {
+  document.getElementById("excelFileInput").click();
+}
+
+function handleExcelImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+      
+      // Clear existing data
+      document.querySelector("#billTable tbody").innerHTML = "";
+      
+      // Import each row
+      jsonData.forEach((row) => {
+        addRow();
+        const newRow = document.querySelector("#billTable tbody tr:last-child");
+        
+        if (row['Bill Number']) newRow.querySelector("td:nth-child(1) input").value = row['Bill Number'];
+        if (row['Date']) newRow.querySelector("td:nth-child(2) input").value = row['Date'];
+        if (row['Bill Amount (₹)']) newRow.querySelector(".billAmount").value = row['Bill Amount (₹)'];
+        if (row['Amount Received (₹)']) newRow.querySelector(".receivedAmount").value = row['Amount Received (₹)'];
+        
+        updateRow(newRow.querySelector(".billAmount"));
+      });
+      
+      calculateTotals();
+      showToast(`Imported ${jsonData.length} bills successfully!`, "success");
+    } catch (error) {
+      showToast("Failed to import Excel file. Please check the format.", "error");
+      console.error(error);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  
+  // Reset file input
+  event.target.value = '';
 }

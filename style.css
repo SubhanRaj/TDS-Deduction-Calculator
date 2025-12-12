@@ -1,3 +1,88 @@
+/* Print Styles */
+@media print {
+  .no-print,
+  button,
+  .btn,
+  input[type="file"],
+  #summaryDashboard,
+  .mb-4.p-3.bg-light.border.rounded:first-of-type {
+    display: none !important;
+  }
+  
+  body {
+    padding: 0 !important;
+  }
+  
+  .container {
+    max-width: 100% !important;
+    box-shadow: none !important;
+  }
+  
+  table {
+    page-break-inside: auto;
+  }
+  
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+  
+  thead {
+    display: table-header-group;
+  }
+  
+  /* Add print header */
+  .container::before {
+    content: attr(data-company-name) " - TDS & GST Deduction Report";
+    display: block;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #000;
+  }
+}
+
+/* Mobile Enhancements */
+@media (max-width: 768px) {
+  /* Larger touch targets */
+  .btn {
+    min-height: 44px;
+    font-size: 14px;
+  }
+  
+  input, select {
+    min-height: 44px;
+  }
+  
+  /* Better mobile table */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Highlight active row */
+  .table tbody tr:active,
+  .table tbody tr:focus-within {
+    background-color: #f8f9fa;
+    outline: 2px solid #0d6efd;
+  }
+}
+
+/* Accessibility */
+button:focus,
+input:focus,
+select:focus {
+  outline: 2px solid #0d6efd;
+  outline-offset: 2px;
+}
+
+/* Toast positioning for mobile */
+.toastify {
+  font-family: inherit;
+}
+
 @media (max-width: 1024px) {
   .table thead {
     display: none;
@@ -34,3 +119,4 @@
     margin-right: 0.5rem;
   }
 }
+
