@@ -1,6 +1,66 @@
 document.addEventListener("DOMContentLoaded", function () {
   loadFromLocalStorage();
 });
+
+function handlePercentageChange() {
+  const select = document.getElementById("deductionPercentageSelect");
+  const customInput = document.getElementById("customPercentage");
+  
+  if (select.value === "custom") {
+    customInput.style.display = "block";
+    customInput.focus();
+  } else {
+    customInput.style.display = "none";
+    customInput.value = "";
+  }
+  
+  // Recalculate if there are values
+  if (document.getElementById("manualBilled").value || document.getElementById("manualReceived").value) {
+    manualCalculation();
+  }
+}
+
+function applyCustomPercentage() {
+  const customValue = parseFloat(document.getElementById("customPercentage").value);
+  if (customValue && customValue > 0) {
+    manualCalculation();
+  }
+}
+
+function getSelectedPercentage(billedAmount) {
+  const select = document.getElementById("deductionPercentageSelect");
+  const customInput = document.getElementById("customPercentage");
+  
+  if (select.value === "auto") {
+    // Use default logic
+    return billedAmount > 25000 ? 4.24 : 2.24;
+  } else if (select.value === "custom") {
+    // Use custom percentage
+    const customValue = parseFloat(customInput.value);
+    return customValue && customValue > 0 ? customValue : (billedAmount > 25000 ? 4.24 : 2.24);
+  } else {
+    // Use selected percentage
+    return parseFloat(select.value);
+  }
+}
+
+function getDeductionDetails(percentage) {
+  // Round to 2 decimal places for comparison to handle floating point precision
+  const rounded = Math.round(percentage * 100) / 100;
+  
+  if (Math.abs(rounded - 4.24) < 0.01) {
+    return "2% GST + 2.24% TDS";
+  } else if (Math.abs(rounded - 2.24) < 0.01) {
+    return "2.24% TDS";
+  } else if (Math.abs(rounded - 2.40) < 0.01) {
+    return "2.40% TDS";
+  } else if (Math.abs(rounded - 2.43) < 0.01) {
+    return "2.43% TDS";
+  } else {
+    return rounded.toFixed(2) + "% Deduction";
+  }
+}
+
 function manualCalculation() {
   let billed = parseFloat(document.getElementById("manualBilled").value) || 0;
   let received =
@@ -9,19 +69,18 @@ function manualCalculation() {
   let deductionDetails = "";
 
   if (billed) {
-    percentage = billed > 25000 ? 4.24 : 2.24;
-    deductionDetails = billed > 25000 ? "2% GST + 2.24% TDS" : "2.24% TDS";
+    percentage = getSelectedPercentage(billed);
+    deductionDetails = getDeductionDetails(percentage);
     received = billed - (billed * percentage) / 100;
   } else if (received) {
-    billed = received / (1 - 2.24 / 100);
-    if (billed > 25000) {
-      billed = received / (1 - 4.24 / 100);
-      percentage = 4.24;
-      deductionDetails = "2% GST + 2.24% TDS";
-    } else {
-      percentage = 2.24;
-      deductionDetails = "2.24% TDS";
-    }
+    // For received amount, we need to calculate backwards
+    // First get the percentage based on a rough estimate
+    let estimatedBilled = received / (1 - 2.24 / 100);
+    percentage = getSelectedPercentage(estimatedBilled);
+    
+    // Recalculate billed amount with correct percentage
+    billed = received / (1 - percentage / 100);
+    deductionDetails = getDeductionDetails(percentage);
   }
 
   document.getElementById("manualBilled").value = billed.toFixed(2);
@@ -74,16 +133,15 @@ function calculateTotals() {
 
   if (totalBilled > 0) {
     totalPercentage = (totalDeducted / totalBilled) * 100;
-    totalDeductionDetails =
-      totalPercentage > 2.24 ? "2% GST + 2.24% TDS" : "2.24% TDS";
+    totalDeductionDetails = getDeductionDetails(totalPercentage);
   } else {
     totalPercentage = 0;
     totalDeductionDetails = "2.24% TDS";
   }
 
-  document.getElementById("totalBilled").innerText = totalBilled;
+  document.getElementById("totalBilled").innerText = totalBilled.toFixed(2);
   document.getElementById("totalDeducted").innerText = totalDeducted.toFixed(2);
-  document.getElementById("totalReceived").innerText = totalReceived;
+  document.getElementById("totalReceived").innerText = totalReceived.toFixed(2);
   document.getElementById("totalDeductionPercentage").innerText =
     totalPercentage.toFixed(2) + "% " + totalDeductionDetails;
 
@@ -121,10 +179,7 @@ function updateRow(input) {
     parseFloat(
       document.getElementById("manualDeductionPercentage").innerText
     ) || 0;
-  let deductionDetails =
-    document
-      .getElementById("manualDeductionPercentage")
-      .innerText.split(" ")[1] || "";
+  let deductionDetails = getDeductionDetails(percentage);
 
   if (billAmount) {
     receivedAmount = billAmount - (billAmount * percentage) / 100;
@@ -166,6 +221,9 @@ function clearFields() {
   document.getElementById("manualReceived").value = "";
   document.getElementById("manualDeduction").innerText = "0.00";
   document.getElementById("manualDeductionPercentage").innerText = "0.00%";
+  document.getElementById("deductionPercentageSelect").value = "auto";
+  document.getElementById("customPercentage").value = "";
+  document.getElementById("customPercentage").style.display = "none";
   document.querySelector("#billTable tbody").innerHTML = "";
   localStorage.removeItem("tableData");
   localStorage.removeItem("totals");
@@ -198,6 +256,8 @@ function saveToLocalStorage() {
     manualDeductionPercentage: document.getElementById(
       "manualDeductionPercentage"
     ).innerText,
+    deductionPercentageSelect: document.getElementById("deductionPercentageSelect").value,
+    customPercentage: document.getElementById("customPercentage").value,
   };
 
   localStorage.setItem("tableData", JSON.stringify(tableData));
@@ -215,6 +275,8 @@ function loadFromLocalStorage() {
     manualReceived: "",
     manualDeduction: "0.00",
     manualDeductionPercentage: "0.00%",
+    deductionPercentageSelect: "auto",
+    customPercentage: "",
   };
 
   const tableBody = document.querySelector("#billTable tbody");
@@ -248,6 +310,13 @@ function loadFromLocalStorage() {
   document.getElementById("manualDeduction").innerText = totals.manualDeduction;
   document.getElementById("manualDeductionPercentage").innerText =
     totals.manualDeductionPercentage;
+  document.getElementById("deductionPercentageSelect").value = totals.deductionPercentageSelect || "auto";
+  document.getElementById("customPercentage").value = totals.customPercentage || "";
+  
+  // Show custom input if custom was selected
+  if (totals.deductionPercentageSelect === "custom") {
+    document.getElementById("customPercentage").style.display = "block";
+  }
 }
 function exportToExcel() {
   let table = document.getElementById("billTable");
