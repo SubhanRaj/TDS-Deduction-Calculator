@@ -571,22 +571,75 @@ function loadFromLocalStorage() {
   updateDashboard();
 }
 function exportToExcel() {
-  let table = document.getElementById("billTable");
-  if (!table) {
-    alert("Table not found!");
+  const rows = document.querySelectorAll("#billTable tbody tr");
+  if (rows.length === 0) {
+    showToast("No data to export!", "warning");
     return;
   }
+  
+  // Create data array
+  const data = [];
+  
+  // Add headers (excluding checkbox and action columns)
+  data.push([
+    "Bill Number",
+    "Date",
+    "Bill Amount (₹)",
+    "Deduction (₹)",
+    "Deduction Percentage & Type",
+    "Amount Received (₹)"
+  ]);
+  
+  // Add rows
+  rows.forEach((row) => {
+    const billNumber = row.querySelector("td:nth-child(2) input").value || "";
+    const date = row.querySelector("td:nth-child(3) input").value || "";
+    const billAmount = row.querySelector("td:nth-child(4) input").value || "";
+    const deduction = row.querySelector("td:nth-child(5)").innerText || "";
+    const deductionPercentage = row.querySelector("td:nth-child(6)").innerText || "";
+    const amountReceived = row.querySelector("td:nth-child(7) input").value || "";
+    
+    data.push([
+      billNumber,
+      date,
+      parseFloat(billAmount) || 0,
+      parseFloat(deduction) || 0,
+      deductionPercentage,
+      parseFloat(amountReceived) || 0
+    ]);
+  });
+  
+  // Add totals
+  data.push([]);
+  data.push([
+    "Total",
+    "",
+    parseFloat(document.getElementById("totalBilled").innerText) || 0,
+    parseFloat(document.getElementById("totalDeducted").innerText) || 0,
+    document.getElementById("totalDeductionPercentage").innerText || "",
+    parseFloat(document.getElementById("totalReceived").innerText) || 0
+  ]);
+  
+  // Create workbook and worksheet
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "TDS Deduction");
   
   const companyName = document.getElementById("companyName").value || "TDS-GST";
   const date = new Date().toISOString().split('T')[0];
   const filename = `${companyName.replace(/\s+/g, '-')}_TDS-Deduction_${date}.xlsx`;
   
-  let wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
   XLSX.writeFile(wb, filename);
-  showToast("Exported to Excel successfully!", "success");
+  showToast("✅ Exported to Excel successfully!", "success");
 }
 
 function exportToPDF() {
+  const rows = document.querySelectorAll("#billTable tbody tr");
+  if (rows.length === 0) {
+    showToast("No data to export!", "warning");
+    return;
+  }
+  
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   
@@ -603,12 +656,49 @@ function exportToPDF() {
     doc.text(`GSTN: ${panNumber}`, 105, 28, { align: "center" });
   }
 
+  // Create table data (excluding checkbox and action columns)
+  const tableData = [];
+  rows.forEach((row) => {
+    const billNumber = row.querySelector("td:nth-child(2) input").value || "";
+    const date = row.querySelector("td:nth-child(3) input").value || "";
+    const billAmount = row.querySelector("td:nth-child(4) input").value || "";
+    const deduction = row.querySelector("td:nth-child(5)").innerText || "";
+    const deductionPercentage = row.querySelector("td:nth-child(6)").innerText || "";
+    const amountReceived = row.querySelector("td:nth-child(7) input").value || "";
+    
+    tableData.push([
+      billNumber,
+      date,
+      billAmount,
+      deduction,
+      deductionPercentage,
+      amountReceived
+    ]);
+  });
+
   // Use autoTable plugin
   doc.autoTable({
-    html: "#billTable",
+    head: [[
+      "Bill Number",
+      "Date",
+      "Bill Amount (₹)",
+      "Deduction (₹)",
+      "Deduction %",
+      "Received (₹)"
+    ]],
+    body: tableData,
     startY: panNumber ? 32 : 26,
     theme: "grid",
     headStyles: { fillColor: [76, 175, 80] },
+    styles: { fontSize: 8 },
+    columnStyles: {
+      0: { cellWidth: 20 },
+      1: { cellWidth: 25 },
+      2: { cellWidth: 25 },
+      3: { cellWidth: 25 },
+      4: { cellWidth: 40 },
+      5: { cellWidth: 25 }
+    }
   });
   
   // Add totals
@@ -620,7 +710,7 @@ function exportToPDF() {
 
   const filename = `${companyName.replace(/\s+/g, '-')}_${date.replace(/\//g, '-')}.pdf`;
   doc.save(filename);
-  showToast("Exported to PDF successfully!", "success");
+  showToast("✅ Exported to PDF successfully!", "success");
 }
 
 // Dashboard update function
