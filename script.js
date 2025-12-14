@@ -406,12 +406,12 @@ function saveToLocalStorage(showNotification = false) {
   const tableData = [];
   document.querySelectorAll("#billTable tbody tr").forEach((row) => {
     const rowData = {
-      billNumber: row.querySelector("td:nth-child(1) input").value,
-      date: row.querySelector("td:nth-child(2) input").value,
-      billAmount: row.querySelector("td:nth-child(3) input").value,
-      deduction: row.querySelector("td:nth-child(4)").innerText,
-      deductionPercentage: row.querySelector("td:nth-child(5)").innerText,
-      amountReceived: row.querySelector("td:nth-child(6) input").value,
+      billNumber: row.querySelector("td:nth-child(2) input").value,
+      date: row.querySelector("td:nth-child(3) input").value,
+      billAmount: row.querySelector("td:nth-child(4) input").value,
+      deduction: row.querySelector("td:nth-child(5)").innerText,
+      deductionPercentage: row.querySelector("td:nth-child(6)").innerText,
+      amountReceived: row.querySelector("td:nth-child(7) input").value,
     };
     tableData.push(rowData);
   });
@@ -540,7 +540,7 @@ function exportToPDF() {
   doc.setFontSize(10);
   doc.text(`Date: ${date}`, 105, 22, { align: "center" });
   if (panNumber) {
-    doc.text(`PAN: ${panNumber}`, 105, 28, { align: "center" });
+    doc.text(`GSTN: ${panNumber}`, 105, 28, { align: "center" });
   }
 
   // Use autoTable plugin
