@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tds-calculator-v3';
+const CACHE_NAME = 'tds-calculator-v4';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -19,7 +19,20 @@ const urlsToCache = [
   '/assets/icons/ios/144.png',
   '/assets/icons/ios/120.png',
   '/assets/icons/ios/32.png',
-  '/assets/icons/ios/16.png'
+  '/assets/icons/ios/16.png',
+  // CDN Resources - Cloudflare
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/js/all.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.23.0/sweetalert2.min.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.23.0/sweetalert2.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.2/jspdf.plugin.autotable.min.js'
 ];
 
 // Install Service Worker
@@ -51,38 +64,37 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch Strategy: Network First, fallback to Cache
+// Fetch Strategy: Cache First (Offline First) for all resources
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Clone the response
-        const responseToCache = response.clone();
+    caches.match(event.request)
+      .then((cachedResponse) => {
+        // If found in cache, return it immediately
+        if (cachedResponse) {
+          return cachedResponse;
+        }
         
-        // Cache the fetched response for future use
-        caches.open(CACHE_NAME)
-          .then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        
-        return response;
-      })
-      .catch(() => {
-        // If network fails, try cache
-        return caches.match(event.request)
+        // If not in cache, fetch from network and cache it
+        return fetch(event.request)
           .then((response) => {
-            if (response) {
+            // Check if valid response
+            if (!response || response.status !== 200 || response.type === 'error') {
               return response;
             }
             
-            // For CDN resources, return a friendly error
-            if (event.request.url.includes('cdn.')) {
-              return new Response('Offline - CDN resource not available', {
-                status: 503,
-                statusText: 'Service Unavailable'
-              });
-            }
+            // Clone the response
+            const responseToCache = response.clone();
             
+            // Cache the fetched response for future use
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+            
+            return response;
+          })
+          .catch(() => {
+            // If both cache and network fail, return offline fallback
             return caches.match('/index.html');
           });
       })
