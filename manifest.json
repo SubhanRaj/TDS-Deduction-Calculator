@@ -10,7 +10,7 @@
   "icons": [
     {
       "src": "/assets/logo.svg",
-      "sizes": "512x512",
+      "sizes": "1024x1024",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
@@ -60,11 +60,32 @@
   "categories": ["finance", "productivity", "business"],
   "screenshots": [
     {
-      "src": "/assets/screenshots/screenshot.png",
-      "sizes": "1920x945",
+      "src": "/assets/screenshots/1920x1080.png",
+      "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "TDS & GST Calculator Main Interface"
+      "label": "TDS & GST Calculator - Desktop View"
+    },
+    {
+      "src": "/assets/screenshots/iPhone 14 Pro Max Potrait.png",
+      "sizes": "1290x2796",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "TDS Calculator - iPhone 14 Pro Max"
+    },
+    {
+      "src": "/assets/screenshots/Samsung Galaxy S20 Ultra Potrait.png",
+      "sizes": "1442x3202",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "TDS Calculator - Samsung Galaxy S20 Ultra"
+    },
+    {
+      "src": "/assets/screenshots/iPad Pro Landscape.png",
+      "sizes": "2732x2048",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "TDS Calculator - iPad Pro Landscape"
     }
   ],
   "shortcuts": [

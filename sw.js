@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tds-calculator-v2';
+const CACHE_NAME = 'tds-calculator-v3';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -8,7 +8,10 @@ const urlsToCache = [
   '/assets/logo.svg',
   '/assets/logo.png',
   '/assets/logo.webp',
-  '/assets/screenshots/screenshot.png',
+  '/assets/screenshots/1920x1080.png',
+  '/assets/screenshots/iPhone 14 Pro Max Potrait.png',
+  '/assets/screenshots/Samsung Galaxy S20 Ultra Potrait.png',
+  '/assets/screenshots/iPad Pro Landscape.png',
   '/assets/icons/android/android-launchericon-192-192.png',
   '/assets/icons/android/android-launchericon-512-512.png',
   '/assets/icons/ios/180.png',
