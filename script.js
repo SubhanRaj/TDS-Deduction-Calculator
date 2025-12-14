@@ -272,6 +272,26 @@ function calculateTotals() {
   saveToLocalStorage();
 }
 function addRow() {
+  // Check if manual totals are set and if bills would exceed them
+  const manualBilled = parseFloat(document.getElementById("manualBilled").value) || 0;
+  const manualReceived = parseFloat(document.getElementById("manualReceived").value) || 0;
+  
+  if (manualBilled > 0 || manualReceived > 0) {
+    // Get current totals from bills
+    const currentTotalBilled = parseFloat(document.getElementById("totalBilled").innerText) || 0;
+    const currentTotalReceived = parseFloat(document.getElementById("totalReceived").innerText) || 0;
+    
+    // Check if we've already reached the manual totals
+    if (manualBilled > 0 && currentTotalBilled >= manualBilled) {
+      showToast("⚠️ Cannot add more bills. Total billed amount already reached!", "warning");
+      return;
+    }
+    if (manualReceived > 0 && currentTotalReceived >= manualReceived) {
+      showToast("⚠️ Cannot add more bills. Total received amount already reached!", "warning");
+      return;
+    }
+  }
+  
   let table = document
     .getElementById("billTable")
     .getElementsByTagName("tbody")[0];
@@ -308,6 +328,44 @@ function updateRow(input) {
   let billAmount = parseFloat(row.querySelector(".billAmount").value) || 0;
   let receivedAmount =
     parseFloat(row.querySelector(".receivedAmount").value) || 0;
+  
+  // Check if manual totals are set (indicating they were entered first)
+  const manualBilled = parseFloat(document.getElementById("manualBilled").value) || 0;
+  const manualReceived = parseFloat(document.getElementById("manualReceived").value) || 0;
+  
+  if (manualBilled > 0 || manualReceived > 0) {
+    // Calculate what the total would be with this row
+    let totalBilledWithoutThis = 0;
+    let totalReceivedWithoutThis = 0;
+    
+    document.querySelectorAll("#billTable tbody tr").forEach((r) => {
+      if (r !== row) {
+        let ba = parseFloat(r.querySelector(".billAmount").value) || 0;
+        let ra = parseFloat(r.querySelector(".receivedAmount").value) || 0;
+        totalBilledWithoutThis += ba;
+        totalReceivedWithoutThis += ra;
+      }
+    });
+    
+    // Check if adding this row would exceed manual totals
+    if (manualBilled > 0) {
+      const remainingBilled = manualBilled - totalBilledWithoutThis;
+      if (billAmount > remainingBilled) {
+        showToast(`⚠️ Bill amount exceeds remaining limit. Maximum allowed: ₹${remainingBilled.toFixed(2)}`, "warning");
+        row.querySelector(".billAmount").value = remainingBilled.toFixed(2);
+        billAmount = remainingBilled;
+      }
+    }
+    
+    if (manualReceived > 0) {
+      const remainingReceived = manualReceived - totalReceivedWithoutThis;
+      if (receivedAmount > remainingReceived) {
+        showToast(`⚠️ Received amount exceeds remaining limit. Maximum allowed: ₹${remainingReceived.toFixed(2)}`, "warning");
+        row.querySelector(".receivedAmount").value = remainingReceived.toFixed(2);
+        receivedAmount = remainingReceived;
+      }
+    }
+  }
   
   // Get percentage from manual deduction field, or use default logic
   let percentage = parseFloat(document.getElementById("manualDeductionPercentage").innerText) || 0;
@@ -394,6 +452,8 @@ function clearFields() {
       document.getElementById("deductionPercentageSelect").value = "auto";
       document.getElementById("customPercentage").value = "";
       document.getElementById("customPercentage").style.display = "none";
+      document.getElementById("companyName").value = "";
+      document.getElementById("panNumber").value = "";
       document.querySelector("#billTable tbody").innerHTML = "";
       localStorage.removeItem("tableData");
       localStorage.removeItem("totals");
