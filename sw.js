@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tds-calculator-v4';
+const CACHE_NAME = 'tds-calculator-v1.0.0';
 const urlsToCache = [
   '/',
   '/index.html',

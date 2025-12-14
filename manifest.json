@@ -1,6 +1,7 @@
 {
   "name": "TDS & GST Deduction Calculator",
   "short_name": "TDS Calculator",
+  "version": "1.0.0",
   "description": "Calculate TDS and GST deductions from payments. Track multiple bills, export to Excel/PDF, and work offline.",
   "start_url": "/",
   "display": "standalone",
