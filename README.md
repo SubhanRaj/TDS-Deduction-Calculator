@@ -312,30 +312,3 @@ If this project helped you, please give it a ⭐️!
 **Made with ❤️ by [Subhan Raj](https://github.com/SubhanRaj)**
 
 [Report Bug](https://github.com/SubhanRaj/TDS-Deduction-Calculator/issues) · [Request Feature](https://github.com/SubhanRaj/TDS-Deduction-Calculator/issues)
-
-</div>
-   ```sh
-   cd TDS-Deduction-Calculator
-   ```
-3. Open `index.html` in your browser - No build process required!
-
-### Offline Capability
-Works 100% offline once loaded. All CDN resources have graceful fallbacks.
-
-## 🎯 Use Cases
-
-- **Freelancers**: Track TDS deductions from client payments
-- **Contractors**: Manage government contract deductions
-- **Small Businesses**: Calculate GST and TDS for multiple invoices
-- **Accountants**: Quick deduction calculations for clients
-- **Invoice Management**: Keep records with export capabilities
-
-## 🌐 Browser Compatibility
-
-- ✅ Chrome/Edge (latest)
-- ✅ Firefox (latest)
-- ✅ Safari (latest)
-- ✅ Mobile browsers (iOS Safari, Chrome Mobile)
-
-## 📝 License
-This project is licensed under the MIT License. See the [LICENSE](license) file for more information.
