@@ -4,10 +4,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Professional TDS & GST deduction calculator for freelancers, contractors, and businesses. Calculate deductions, track bills, export to Excel/PDF, and work offline." />
-    <meta name="keywords" content="TDS calculator, GST calculator, tax deduction, freelance, contractor, invoice, billing" />
+    <meta name="description"
+        content="Professional TDS & GST deduction calculator for freelancers, contractors, and businesses. Calculate deductions, track bills, export to Excel/PDF, and work offline." />
+    <meta name="keywords"
+        content="TDS calculator, GST calculator, tax deduction, freelance, contractor, invoice, billing" />
     <meta name="author" content="Subhan Raj" />
-    
+
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#4CAF50" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -18,13 +20,13 @@
     <meta name="msapplication-TileColor" content="#4CAF50" />
     <meta name="msapplication-tap-highlight" content="no" />
     <meta name="msapplication-config" content="/browserconfig.xml" />
-    
+
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="/assets/logo.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/ios/32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/ios/16.png" />
     <link rel="shortcut icon" href="/assets/logo.png" />
-    
+
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/ios/180.png" />
     <link rel="apple-touch-icon" sizes="167x167" href="/assets/icons/ios/167.png" />
@@ -34,11 +36,11 @@
     <link rel="apple-touch-icon" sizes="114x114" href="/assets/icons/ios/114.png" />
     <link rel="apple-touch-icon" sizes="76x76" href="/assets/icons/ios/76.png" />
     <link rel="apple-touch-icon" href="/assets/icons/ios/180.png" />
-    
+
     <title>TDS & GST Deduction Calculator</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="canonical" href="https://tds-deduction-calculator.pages.dev/" />
-    
+
     <!-- Schema.org JSON-LD -->
     <script type="application/ld+json">
     {
@@ -85,20 +87,25 @@
       }
     }
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css"
+        integrity="sha512-2bBQCjcnw658Lho4nlXJcc6WkV/UxpE/sAokbXPxQNGqmNdQrWqtw26Ns9kFF/yG792pKR1Sx8/Y1Lf1XN4GKA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.css"
+        integrity="sha512-oe8OpYjBaDWPt2VmSFR+qYOdnTjeV9QPLJUeqZyprDEQvQLJ9C5PCFclxwNuvb/GQgQngdCXzKSFltuHD3eCxA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.23.0/sweetalert2.min.css"
+        integrity="sha512-Ivy7sPrd6LPp20adiK3al16GBelPtqswhJnyXuha3kGtmQ1G2qWpjuipfVDaZUwH26b3RDe8x707asEpvxl7iA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="style.css" />
 </head>
 
 <body class="bg-light p-4">
     <div class="container bg-white p-4 shadow rounded">
         <h2 class="mb-4 text-center">TDS & GST Deduction Calculator</h2>
-        
+
         <!-- Company Info Section -->
         <div class="mb-4 p-3 bg-light border rounded">
             <div class="row">
@@ -108,13 +115,15 @@
                 </div>
                 <div class="col-md-6 col-12 mb-2">
                     <label class="form-label"><strong>PAN Number:</strong></label>
-                    <input type="text" id="panNumber" class="form-control" placeholder="Optional PAN number" maxlength="10" />
+                    <input type="text" id="panNumber" class="form-control" placeholder="Optional PAN number"
+                        maxlength="10" />
                 </div>
             </div>
         </div>
 
         <!-- Summary Dashboard -->
-        <div class="mb-4 p-3 bg-info bg-opacity-10 border border-info rounded" id="summaryDashboard" style="display: none;">
+        <div class="mb-4 p-3 bg-info bg-opacity-10 border border-info rounded" id="summaryDashboard"
+            style="display: none;">
             <h5 class="mb-3"><i class="fas fa-chart-line"></i> Summary Dashboard</h5>
             <div class="row text-center">
                 <div class="col-md-3 col-6 mb-2">
@@ -175,7 +184,8 @@
                         <option value="4.24">4.24% (2% GST + 2.24% TDS)</option>
                         <option value="custom">Custom Percentage</option>
                     </select>
-                    <input type="number" id="customPercentage" class="form-control" placeholder="Enter custom %" step="0.01" style="display: none;" onblur="applyCustomPercentage()" />
+                    <input type="number" id="customPercentage" class="form-control" placeholder="Enter custom %"
+                        step="0.01" style="display: none;" onblur="applyCustomPercentage()" />
                 </div>
             </div>
             <div class="row mt-3 text-center">
@@ -204,7 +214,8 @@
                 <thead class="table-light text-center">
                     <tr>
                         <th style="width: 50px;">
-                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" title="Select all bills" aria-label="Select all bills">
+                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" title="Select all bills"
+                                aria-label="Select all bills">
                         </th>
                         <th>Bill Number</th>
                         <th>Date</th>
@@ -222,7 +233,8 @@
             <button onclick="addRow()" class="btn btn-primary mb-2 mb-md-0" title="Ctrl/Cmd + N">
                 <i class="fas fa-plus"></i> Add Bill
             </button>
-            <button onclick="deleteSelectedRows()" class="btn btn-warning mb-2 mb-md-0" id="deleteSelectedBtn" style="display: none;">
+            <button onclick="deleteSelectedRows()" class="btn btn-warning mb-2 mb-md-0" id="deleteSelectedBtn"
+                style="display: none;">
                 <i class="fas fa-trash-alt"></i> Delete Selected
             </button>
             <button onclick="exportToExcel()" class="btn btn-success mb-2 mb-md-0" title="Ctrl/Cmd + E">
@@ -240,11 +252,13 @@
             <button onclick="copyToClipboard()" class="btn btn-outline-primary">
                 <i class="fas fa-copy"></i> Copy Totals
             </button>
-            <button onclick="showInstallPrompt()" class="btn btn-outline-success no-print" id="installAppBtn" style="display: none;" title="Install this app">
+            <button onclick="showInstallPrompt()" class="btn btn-outline-success no-print" id="installAppBtn"
+                style="display: none;" title="Install this app">
                 <i class="fas fa-download"></i> Install App
             </button>
         </div>
-        <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display: none;" onchange="handleExcelImport(event)" />
+        <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display: none;"
+            onchange="handleExcelImport(event)" />
 
         <div class="mt-4 p-3 bg-light border rounded text-center">
             <div class="row">
@@ -265,9 +279,31 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/js/all.min.js"
+        integrity="sha512-6BTOlkauINO65nLhXhthZMtepgJSghyimIalb+crKRPhvhmsCdnIuGcVbR5/aQY2A+260iC1OPy1oCdB6pSSwQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js"
+        integrity="sha512-HvOjJrdwNpDbkGJIG2ZNqDlVqMo77qbs4Me4cah0HoDrfhrbA+8SBlZn1KrvAQw7cILLPFJvdwIgphzQmMm+Pw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.23.0/sweetalert2.min.js"
+        integrity="sha512-pnPZhx5S+z5FSVwy62gcyG2Mun8h6R+PG01MidzU+NGF06/ytcm2r6+AaWMBXAnDHsdHWtsxS0dH8FBKA84FlQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"
+        integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
+        integrity="sha512-r22gChDnGvBylk90+2e/ycr3RVrDi8DIOkIGNhJlKfuyQM4tIRAI062MaV8sfjQKYVGjOBaZBOA87z+IhZE9DA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"
+        integrity="sha512-+EeCylkt9WHJk5tGJxYdecHOcXFRME7qnbsfeMsdQL6NUPYm2+uGFmyleEqsmVoap/f3dN/sc3BX9t9kHXkHHg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.2/jspdf.plugin.autotable.min.js"
+        integrity="sha512-JizZOUNesiGhMcp9fsA/9W31FOat6QysBM8hSj6ir8iIANIUJ2mhko7Lo1+j0ErftmJ8SebMZLm9iielKjeIEQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
@@ -287,13 +323,13 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            
+
             // Show install button
             const installBtn = document.getElementById('installAppBtn');
             if (installBtn) {
                 installBtn.style.display = 'inline-block';
             }
-            
+
             // Show custom install popup after a delay (only once)
             setTimeout(() => {
                 if (deferredPrompt && !localStorage.getItem('installPromptShown')) {
@@ -304,16 +340,16 @@
 
         function showInstallPrompt() {
             if (!deferredPrompt) return;
-            
+
             // Check if SweetAlert2 is loaded
             if (typeof Swal === 'undefined') {
                 console.error('SweetAlert2 not loaded yet');
                 return;
             }
-            
+
             // Mark as shown so it doesn't repeat
             localStorage.setItem('installPromptShown', 'true');
-            
+
             Swal.fire({
                 title: '📱 Install App',
                 html: `
@@ -353,7 +389,7 @@
             if (deferredPrompt) {
                 // Show the browser's native install prompt
                 deferredPrompt.prompt();
-                
+
                 // Wait for the user to respond to the prompt
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
@@ -372,7 +408,7 @@
                         console.log('User dismissed the install prompt');
                     }
                     deferredPrompt = null;
-                    
+
                     // Hide install button
                     const installBtn = document.getElementById('installAppBtn');
                     if (installBtn) {
@@ -386,7 +422,7 @@
         window.addEventListener('appinstalled', () => {
             console.log('PWA installed successfully');
             deferredPrompt = null;
-            
+
             // Hide install button
             const installBtn = document.getElementById('installAppBtn');
             if (installBtn) {
@@ -398,7 +434,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const action = urlParams.get('action');
-            
+
             if (action === 'add') {
                 setTimeout(() => addRow(), 500);
             } else if (action === 'export') {
