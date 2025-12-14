@@ -1,10 +1,21 @@
-const CACHE_NAME = 'tds-calculator-v1';
+const CACHE_NAME = 'tds-calculator-v2';
 const urlsToCache = [
   '/',
   '/index.html',
   '/style.css',
   '/script.js',
-  '/manifest.json'
+  '/manifest.json',
+  '/assets/logo.svg',
+  '/assets/logo.png',
+  '/assets/logo.webp',
+  '/assets/icons/android/android-launchericon-192-192.png',
+  '/assets/icons/android/android-launchericon-512-512.png',
+  '/assets/icons/ios/180.png',
+  '/assets/icons/ios/152.png',
+  '/assets/icons/ios/144.png',
+  '/assets/icons/ios/120.png',
+  '/assets/icons/ios/32.png',
+  '/assets/icons/ios/16.png'
 ];
 
 // Install Service Worker
@@ -90,8 +101,8 @@ function syncBills() {
 self.addEventListener('push', (event) => {
   const options = {
     body: event.data ? event.data.text() : 'New update available',
-    icon: '/icon-192.png',
-    badge: '/badge-72.png',
+    icon: '/assets/icons/android/android-launchericon-192-192.png',
+    badge: '/assets/icons/android/android-launchericon-72-72.png',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
