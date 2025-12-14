@@ -8,6 +8,7 @@ const urlsToCache = [
   '/assets/logo.svg',
   '/assets/logo.png',
   '/assets/logo.webp',
+  '/assets/screenshots/screenshot.png',
   '/assets/icons/android/android-launchericon-192-192.png',
   '/assets/icons/android/android-launchericon-512-512.png',
   '/assets/icons/ios/180.png',
