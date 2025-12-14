@@ -99,10 +99,10 @@ A professional web-based tool to calculate TDS (Tax Deducted at Source) and GST 
 ![Desktop View](assets/screenshots/1920x1080.png)
 
 ### Mobile View
-![Mobile View](assets/screenshots/iPhone-14-Pro-Max-Potrait.png)
+<img src="assets/screenshots/iPhone-14-Pro-Max-Potrait.png" alt="Mobile View" width="300" />
 
 ### Tablet View
-![Tablet View](assets/screenshots/iPad-Pro-Landscape.png")
+<img src="assets/screenshots/iPad-Pro-Landscape.png" alt="Tablet View" width="600" />
 
 </div>
 
