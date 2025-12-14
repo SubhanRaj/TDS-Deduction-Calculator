@@ -9,6 +9,8 @@
   #deleteSelectedBtn,
   .table th:first-child,
   .table td:first-child,
+  .table th:last-child,
+  .table td:last-child,
   .mb-4.p-3.bg-light.border.rounded:first-of-type {
     display: none !important;
   }
